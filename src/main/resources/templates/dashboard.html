@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f3f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            margin: 0;
+        }
+        .dashboard-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 80%;
+            max-width: 1200px;
+        }
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .folder, .file {
+            width: 200px; /* Yatay uzunluğu artırıldı */
+            height: 100px;
+            background-color: #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            line-height: 100px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .folder:hover, .file:hover {
+            background-color: #d0d0d0;
+        }
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .fab-menu {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .fab-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .fab-menu ul li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .fab-menu ul li:hover {
+            background-color: #f1f1f1;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">MustCloud</div>
+        <div class="items">
+            <div th:if="${folders.size() == 0 && files.size() == 0}">
+                <p>No items available.</p>
+            </div>
+            <div th:each="folder : ${folders}" class="folder" th:onclick="'window.location.href=\'/folders/' + ${folder.folderId} + '\';'">
+                <p th:text="${folder.folderName}"></p>
+            </div>
+            <div th:each="file : ${files}" class="file">
+                <p th:text="${file.fileName}"></p>
+            </div>
+        </div>
+    </div>
+
+    <button class="fab" onclick="toggleFabMenu()">+</button>
+    <div class="fab-menu" id="fabMenu">
+        <ul>
+            <li onclick="showCreateFolderModal()">Yeni Klasör</li>
+            <li>Dosya Yükle</li>
+        </ul>
+    </div>
+
+    <div class="modal" id="createFolderModal">
+        <div class="modal-content">
+            <h2>Yeni Klasör Oluştur</h2>
+            <input type="text" id="folderNameInput" placeholder="Klasör İsmi" />
+            <button onclick="createFolder()">Oluştur</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleFabMenu() {
+            var fabMenu = document.getElementById('fabMenu');
+            if (fabMenu.style.display === 'none' || fabMenu.style.display === '') {
+                fabMenu.style.display = 'block';
+            } else {
+                fabMenu.style.display = 'none';
+            }
+        }
+
+        function showCreateFolderModal() {
+            var modal = document.getElementById('createFolderModal');
+            modal.style.display = 'flex';
+        }
+
+        function createFolder() {
+            var folderName = document.getElementById('folderNameInput').value;
+            var userId = 2; // Kullanıcı ID'si 2 olarak sabitlenmiş
+            if (folderName) {
+                fetch('/api/folders/create?userId=' + userId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ folderName: folderName })
+                }).then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Klasör oluşturulamadı');
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

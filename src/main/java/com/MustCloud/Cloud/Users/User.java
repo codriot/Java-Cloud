@@ -1,64 +1,44 @@
 package com.MustCloud.Cloud.Users;
 
-import java.io.File;
-import java.util.ArrayList;
+import com.MustCloud.Cloud.Files.File;
+import com.MustCloud.Cloud.Folders.Folder;
+
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Entity
+@Table(name = "users")
 public class User {
-    private String id;
-    private String name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer userId;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(nullable = false)
     private String password;
-    private List<File> uploadedFiles;
-    private List<File> downloadedFiles;
 
+    private String name;
 
+    private LocalDateTime signupDate = LocalDateTime.now();
 
+    private String accountType = "Normal";
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<File> files;
 
-    //? Id almayan yapı örnek olarak yeni bir kullanıcı eklerken kullanılabilir.
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Folder> folders;
 
-    public User(String name, String email, String password, List<File> uploadedFiles, List<File> downloadedFiles
-          ) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.uploadedFiles = uploadedFiles;
-        this.uploadedFiles = new ArrayList<>();
-        this.downloadedFiles = new ArrayList<>();
+    // Getters and Setters
+    public Integer getUserId() {
+        return userId;
     }
 
-    //? Id alan yapı örnek olarak veritabanından kullanıcı bilgilerini çekerken kullanılabilir.
-
-    public User(String id, String name, String email, String password, List<File> uploadedFiles,
-            List<File> downloadedFiles) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.uploadedFiles = uploadedFiles;
-        this.downloadedFiles = downloadedFiles;
-    }
-
-    //? Boş constructor
-    public User() {}
-
-
-    //* Getter ve Setterlar
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public String getEmail() {
@@ -77,33 +57,43 @@ public class User {
         this.password = password;
     }
 
-    public List<File> getUploadedFiles() {
-        return uploadedFiles;
+    public String getName() {
+        return name;
     }
 
-    public void setUploadedFiles(List<File> uploadedFiles) {
-        this.uploadedFiles = uploadedFiles;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public List<File> getDownloadedFiles() {
-        return downloadedFiles;
+    public LocalDateTime getSignupDate() {
+        return signupDate;
     }
 
-    public void setDownloadedFiles(List<File> downloadedFiles) {
-        this.downloadedFiles = downloadedFiles;
+    public void setSignupDate(LocalDateTime signupDate) {
+        this.signupDate = signupDate;
     }
 
-
-
-    @Override
-    public String toString() {
-        return "Users [id=" + id + ", name=" + name + ", email=" + email + ", password=" + password + ", uploadedFiles="
-                + uploadedFiles + ", downloadedFiles=" + downloadedFiles + ", lastLoginTime=" + "]";
+    public String getAccountType() {
+        return accountType;
     }
 
-  
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
+    }
 
-    // public void addUploadedFile(File file) {
-    //     this.uploadedFiles.add(file);
-    // }
+    public List<File> getFiles() {
+        return files;
+    }
+
+    public void setFiles(List<File> files) {
+        this.files = files;
+    }
+
+    public List<Folder> getFolders() {
+        return folders;
+    }
+
+    public void setFolders(List<Folder> folders) {
+        this.folders = folders;
+    }
 }
