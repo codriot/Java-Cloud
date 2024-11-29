@@ -34,7 +34,7 @@
             justify-content: center;
         }
         .folder, .file {
-            width: 200px; /* Yatay uzunluğu artırıldı */
+            width: 200px;
             height: 100px;
             background-color: #e0e0e0;
             border-radius: 8px;
@@ -43,6 +43,7 @@
             line-height: 100px;
             cursor: pointer;
             transition: background-color 0.3s;
+            position: relative;
         }
         .folder:hover, .file:hover {
             background-color: #d0d0d0;
@@ -102,21 +103,39 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
+        .dropdown {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+        .dropdown-content a {
+            padding: 10px;
+            display: block;
+            text-decoration: none;
+            color: black;
+        }
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
     </style>
 </head>
-<body>
+<body onload="loadItems()">
     <div class="dashboard-container">
         <div class="header">MustCloud</div>
-        <div class="items">
-            <div th:if="${folders.size() == 0 && files.size() == 0}">
-                <p>No items available.</p>
-            </div>
-            <div th:each="folder : ${folders}" class="folder" th:onclick="'window.location.href=\'/folders/' + ${folder.folderId} + '\';'">
-                <p th:text="${folder.folderName}"></p>
-            </div>
-            <div th:each="file : ${files}" class="file">
-                <p th:text="${file.fileName}"></p>
-            </div>
+        <div class="items" id="items-container">
+            <!-- Dinamik olarak güncellenecek dosya ve klasörler -->
         </div>
     </div>
 
@@ -124,7 +143,7 @@
     <div class="fab-menu" id="fabMenu">
         <ul>
             <li onclick="showCreateFolderModal()">Yeni Klasör</li>
-            <li>Dosya Yükle</li>
+            <li onclick="showUploadFileModal()">Dosya Yükle</li>
         </ul>
     </div>
 
@@ -133,6 +152,14 @@
             <h2>Yeni Klasör Oluştur</h2>
             <input type="text" id="folderNameInput" placeholder="Klasör İsmi" />
             <button onclick="createFolder()">Oluştur</button>
+        </div>
+    </div>
+
+    <div class="modal" id="uploadFileModal">
+        <div class="modal-content">
+            <h2>Dosya Yükle</h2>
+            <input type="file" id="fileInput" />
+            <button onclick="uploadFile()">Yükle</button>
         </div>
     </div>
 
@@ -147,8 +174,17 @@
         }
 
         function showCreateFolderModal() {
-            var modal = document.getElementById('createFolderModal');
-            modal.style.display = 'flex';
+            var createFolderModal = document.getElementById('createFolderModal');
+            var uploadFileModal = document.getElementById('uploadFileModal');
+            uploadFileModal.style.display = 'none'; // Diğer modalı kapat
+            createFolderModal.style.display = 'flex';
+        }
+
+        function showUploadFileModal() {
+            var createFolderModal = document.getElementById('createFolderModal');
+            var uploadFileModal = document.getElementById('uploadFileModal');
+            createFolderModal.style.display = 'none'; // Diğer modalı kapat
+            uploadFileModal.style.display = 'flex';
         }
 
         function createFolder() {
@@ -163,11 +199,150 @@
                     body: JSON.stringify({ folderName: folderName })
                 }).then(response => {
                     if (response.ok) {
-                        location.reload();
+                        loadItems(); // Dosya ve klasörleri yeniden yükle
+                        document.getElementById('createFolderModal').style.display = 'none'; // Modalı kapat
                     } else {
                         alert('Klasör oluşturulamadı');
                     }
                 });
+            }
+        }
+
+        function uploadFile() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+            var userId = 2; // Kullanıcı ID'si 2 olarak sabitlenmiş
+            if (file) {
+                var formData = new FormData();
+                formData.append('file', file);
+                formData.append('userId', userId);
+
+                fetch('/api/files/upload', {
+                    method: 'POST',
+                    body: formData
+                }).then(response => {
+                    if (response.ok) {
+                        loadItems(); // Dosya ve klasörleri yeniden yükle
+                        document.getElementById('uploadFileModal').style.display = 'none'; // Modalı kapat
+                    } else {
+                        alert('Dosya yüklenemedi');
+                    }
+                }).catch(error => {
+                    console.error('Dosya yükleme hatası:', error);
+                    alert('Dosya yüklenemedi');
+                });
+            }
+        }
+
+        function deleteFile(fileId) {
+            fetch('/api/files/delete/' + fileId, {
+                method: 'DELETE'
+            }).then(response => {
+                if (response.ok) {
+                    loadItems(); // Dosya ve klasörleri yeniden yükle
+                } else {
+                    alert('Dosya silinemedi');
+                }
+            });
+        }
+
+        function downloadFile(fileId) {
+            fetch('/api/files/download/' + fileId)
+                .then(response => response.blob())
+                .then(blob => {
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'file.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                })
+                .catch(() => alert('Dosya indirilemedi'));
+        }
+
+        function deleteFolder(folderId) {
+            fetch('/api/folders/delete/' + folderId, {
+                method: 'DELETE'
+            }).then(response => {
+                if (response.ok) {
+                    loadItems(); // Dosya ve klasörleri yeniden yükle
+                } else {
+                    alert('Klasör silinemedi');
+                }
+            });
+        }
+
+        function downloadFolder(folderId) {
+            fetch('/api/folders/download/' + folderId)
+                .then(response => response.blob())
+                .then(blob => {
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'folder.zip';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                })
+                .catch(() => alert('Klasör indirilemedi'));
+        }
+
+        function loadItems() {
+            var userId = 2; // Kullanıcı ID'si 2 olarak sabitlenmiş
+            fetch('/api/files/list/' + userId)
+                .then(response => response.json())
+                .then(files => {
+                    fetch('/api/folders/list/' + userId)
+                        .then(response => response.json())
+                        .then(folders => {
+                            var itemsContainer = document.getElementById('items-container');
+                            itemsContainer.innerHTML = '';
+
+                            folders.forEach(folder => {
+                                var folderElement = document.createElement('div');
+                                folderElement.className = 'folder';
+                                folderElement.innerHTML = `
+                                    <p>${folder.folderName}</p>
+                                    <div class="dropdown">
+                                        &#x22EE;
+                                        <div class="dropdown-content">
+                                            <a href="#" onclick="deleteFolder(${folder.folderId}); return false;">Sil</a>
+                                            <a href="#" onclick="downloadFolder(${folder.folderId}); return false;">Yükle</a>
+                                        </div>
+                                    </div>
+                                `;
+                                itemsContainer.appendChild(folderElement);
+                            });
+
+                            files.forEach(file => {
+                                var fileElement = document.createElement('div');
+                                fileElement.className = 'file';
+                                fileElement.innerHTML = `
+                                    <p>${file.fileName.length > 8 ? file.fileName.substring(0, 8) + '...' : file.fileName}</p>
+                                    <div class="dropdown">
+                                        &#x22EE;
+                                        <div class="dropdown-content">
+                                            <a href="#" onclick="deleteFile(${file.fileId}); return false;">Sil</a>
+                                            <a href="#" onclick="downloadFile(${file.fileId}); return false;">Yükle</a>
+                                        </div>
+                                    </div>
+                                `;
+                                itemsContainer.appendChild(fileElement);
+                            });
+                        });
+                });
+        }
+
+        // Modal dışında bir yere tıklanıldığında modalı kapatma işlevi
+        window.onclick = function(event) {
+            var createFolderModal = document.getElementById('createFolderModal');
+            var uploadFileModal = document.getElementById('uploadFileModal');
+            if (event.target == createFolderModal) {
+                createFolderModal.style.display = 'none';
+            }
+            if (event.target == uploadFileModal) {
+                uploadFileModal.style.display = 'none';
             }
         }
     </script>

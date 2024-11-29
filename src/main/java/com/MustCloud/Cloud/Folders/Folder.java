@@ -2,6 +2,8 @@ package com.MustCloud.Cloud.Folders;
 
 import com.MustCloud.Cloud.Files.File;
 import com.MustCloud.Cloud.Users.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,20 +17,24 @@ public class Folder {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     private String folderName;
 
     @ManyToOne
     @JoinColumn(name = "parent_folder_id")
+    @JsonBackReference("parentFolder")
     private Folder parentFolder;
 
     private LocalDateTime creationDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("parentFolder")
     private List<Folder> subFolders;
 
     @OneToMany(mappedBy = "folder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<File> files;
 
     // Getters and Setters

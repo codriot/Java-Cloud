@@ -2,6 +2,7 @@ package com.MustCloud.Cloud.Files;
 
 import com.MustCloud.Cloud.Folders.Folder;
 import com.MustCloud.Cloud.Users.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -14,10 +15,12 @@ public class File {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "folder_id")
+    @JsonBackReference
     private Folder folder;
 
     private String fileName;

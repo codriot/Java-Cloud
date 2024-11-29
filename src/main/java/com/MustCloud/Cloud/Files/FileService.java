@@ -14,4 +14,16 @@ public class FileService {
     public List<File> getFilesByUserId(Integer userId) {
         return fileRepository.findByUserUserId(userId);
     }
+
+    public File saveFile(File file) {
+        return fileRepository.save(file);
+    }
+
+    public File findFileById(Integer fileId) {
+        return fileRepository.findById(fileId).orElse(null);
+    }
+
+    public void deleteFile(Integer fileId) {
+        fileRepository.deleteById(fileId);
+    }
 }

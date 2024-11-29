@@ -18,4 +18,12 @@ public class FolderService {
     public Folder createFolder(Folder folder) {
         return folderRepository.save(folder);
     }
+
+    public void deleteFolder(Integer folderId) {
+        folderRepository.deleteById(folderId);
+    }
+
+    public Folder findFolderById(Integer folderId) {
+        return folderRepository.findById(folderId).orElse(null);
+    }
 }
