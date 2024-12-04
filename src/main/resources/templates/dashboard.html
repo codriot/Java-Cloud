@@ -103,32 +103,64 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
+        .drop-div{
+            position: absolute;
+            top: 5px;
+            right: 12px;
+        }
         .dropdown {
             position: absolute;
             top: 10px;
             right: 10px;
             cursor: pointer;
+            width: 30px;
+            height: 30px;
+            transition: 0.2s;
         }
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1;
+
+        .dropdown:hover{
+            background-color: #1e1f1f85;
+            border-radius: 50%;
+            transform: 0.2s;
+            color: white;
         }
-        .dropdown-content a {
-            padding: 10px;
-            display: block;
-            text-decoration: none;
-            color: black;
-        }
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
+
+
+
+
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif; /* Sans-serif font ekleme */
+    min-width: 200px;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.dropdown-content a {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+    transition: background-color 0.3s;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown-content .icon {
+    margin-right: 8px;
+}
     </style>
 </head>
 <body onload="loadItems()">
@@ -305,7 +337,8 @@
                                 folderElement.innerHTML = `
                                     <p>${folder.folderName}</p>
                                     <div class="dropdown">
-                                        &#x22EE;
+                                        
+                                        <div class="drop-div">&#x22EE;</div>
                                         <div class="dropdown-content">
                                             <a href="#" onclick="deleteFolder(${folder.folderId}); return false;">Sil</a>
                                             <a href="#" onclick="downloadFolder(${folder.folderId}); return false;">Yükle</a>
