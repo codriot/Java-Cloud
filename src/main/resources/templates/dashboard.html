@@ -321,51 +321,31 @@
         }
 
         function loadItems() {
-            var userId = 2; // Kullanıcı ID'si 2 olarak sabitlenmiş
-            fetch('/api/files/list/' + userId)
-                .then(response => response.json())
-                .then(files => {
-                    fetch('/api/folders/list/' + userId)
-                        .then(response => response.json())
-                        .then(folders => {
-                            var itemsContainer = document.getElementById('items-container');
-                            itemsContainer.innerHTML = '';
+    fetch('/api/files/list', {
+        method: 'GET',
+        credentials: 'same-origin', // Oturumu dahil etmek için
+    })
+    .then(response => response.json())
+    .then(data => {
+        const { files, folders } = data;
+        const itemsContainer = document.getElementById('items-container');
+        itemsContainer.innerHTML = '';
 
-                            folders.forEach(folder => {
-                                var folderElement = document.createElement('div');
-                                folderElement.className = 'folder';
-                                folderElement.innerHTML = `
-                                    <p>${folder.folderName}</p>
-                                    <div class="dropdown">
-                                        
-                                        <div class="drop-div">&#x22EE;</div>
-                                        <div class="dropdown-content">
-                                            <a href="#" onclick="deleteFolder(${folder.folderId}); return false;">Sil</a>
-                                            <a href="#" onclick="downloadFolder(${folder.folderId}); return false;">Yükle</a>
-                                        </div>
-                                    </div>
-                                `;
-                                itemsContainer.appendChild(folderElement);
-                            });
+        folders.forEach(folder => {
+            var folderElement = document.createElement('div');
+            folderElement.className = 'folder';
+            folderElement.innerHTML = `<p>${folder.folderName}</p>`;
+            itemsContainer.appendChild(folderElement);
+        });
 
-                            files.forEach(file => {
-                                var fileElement = document.createElement('div');
-                                fileElement.className = 'file';
-                                fileElement.innerHTML = `
-                                    <p>${file.fileName.length > 8 ? file.fileName.substring(0, 8) + '...' : file.fileName}</p>
-                                    <div class="dropdown">
-                                        &#x22EE;
-                                        <div class="dropdown-content">
-                                            <a href="#" onclick="deleteFile(${file.fileId}); return false;">Sil</a>
-                                            <a href="#" onclick="downloadFile(${file.fileId}); return false;">Yükle</a>
-                                        </div>
-                                    </div>
-                                `;
-                                itemsContainer.appendChild(fileElement);
-                            });
-                        });
-                });
-        }
+        files.forEach(file => {
+            var fileElement = document.createElement('div');
+            fileElement.className = 'file';
+            fileElement.innerHTML = `<p>${file.fileName}</p>`;
+            itemsContainer.appendChild(fileElement);
+        });
+    });
+}
 
         // Modal dışında bir yere tıklanıldığında modalı kapatma işlevi
         window.onclick = function(event) {

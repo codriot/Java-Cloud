@@ -28,7 +28,7 @@ public class AuthController {
         return "login";
     }
 
-    @PostMapping("/login")
+    @PostMapping("/dashboard")
     public String login(@RequestParam String email, @RequestParam String password, Model model) {
         User user = userService.findUserByEmail(email);
         if (user != null && user.getPassword().equals(password)) {
