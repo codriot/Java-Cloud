@@ -125,38 +125,38 @@
             color: white;
         }
 
-.dropdown-content {
-    display: none;
-    position: absolute;
-    left: 0;
-    top: 0;
-    background-color: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1;
-    border-radius: 4px;
-    overflow: hidden;
-    font-family: 'Arial', sans-serif; /* Sans-serif font ekleme */
-    min-width: 200px;
-    font-size: 13px;
-    font-weight: 400;
-}
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            left: 0;
+            top: 30px;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif; /* Sans-serif font ekleme */
+            min-width: 200px;
+            font-size: 13px;
+            font-weight: 400;
+        }
 
-.dropdown-content a {
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: black;
-    transition: background-color 0.3s;
-}
+        .dropdown-content a {
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: black;
+            transition: background-color 0.3s;
+        }
 
-.dropdown-content a:hover {
-    background-color: #f1f1f1;
-}
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
 
-.dropdown-content .icon {
-    margin-right: 8px;
-}
+        .dropdown-content .icon {
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body onload="loadItems()" th:attr="data-user-id=${userId}">
@@ -188,6 +188,15 @@
             <h2>Dosya Yükle</h2>
             <input type="file" id="fileInput" />
             <button onclick="uploadFile()" th:attr="data-user-id=${userId}">Yükle</button>
+        </div>
+    </div>
+        <div class="modal" id="fileInfoModal">
+        <div class="modal-content">
+            <h2>Dosya Bilgileri</h2>
+            <p id="fileInfoName"></p>
+            <p id="fileInfoType"></p>
+            <p id="fileInfoSize"></p>
+            <button onclick="closeFileInfoModal()">Kapat</button>
         </div>
     </div>
 
@@ -313,63 +322,90 @@
                 .catch(() => alert('Klasör indirilemedi'));
         }
 
- function loadItems() {
+        function toggleDropdown(event) {
+            var dropdownContent = event.currentTarget.querySelector('.dropdown-content');
+            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+        }
+
+function loadItems() {
     var userId = document.body.getAttribute('data-user-id');
-    fetch('/api/files/list/' + userId)
+    var currentFolder = window.location.pathname.split('/').pop();
+    fetch('/api/files/list/' + userId + '/' + currentFolder)
         .then(response => response.json())
         .then(files => {
-            fetch('/api/folders/list/' + userId)
+            fetch('/api/folders/list/' + userId + '/' + currentFolder)
                 .then(response => response.json())
                 .then(folders => {
                     var itemsContainer = document.getElementById('items-container');
                     itemsContainer.innerHTML = '';
 
-                    folders.forEach(folder => {
-                        var folderElement = document.createElement('div');
-                        folderElement.className = 'folder';
-                        folderElement.innerHTML = `
-                            <p>${folder.folderName}</p>
-                            <div class="dropdown">
-                                <div class="drop-div">&#x22EE;</div>
-                                <div class="dropdown-content">
-                                    <a href="#" onclick="deleteFolder(${folder.folderId}); return false;">Sil</a>
-                                    <a href="#" onclick="downloadFolder(${folder.folderId}); return false;">Yükle</a>
+                    if (Array.isArray(folders)) {
+                        folders.forEach(folder => {
+                            var folderElement = document.createElement('div');
+                            folderElement.className = 'folder';
+                            folderElement.innerHTML = `
+                                <p>${folder.folderName}</p>
+                                <div class="dropdown">
+                                    <div class="drop-div">&#x22EE;</div>
+                                    <div class="dropdown-content">
+                                        <a href="#" onclick="deleteFolder(${folder.folderId}); return false;">Sil</a>
+                                        <a href="#" onclick="downloadFolder(${folder.folderId}); return false;">Yükle</a>
+                                    </div>
                                 </div>
-                            </div>
-                        `;
-                        itemsContainer.appendChild(folderElement);
-                    });
+                            `;
+                            folderElement.onclick = () => window.location.href = '/dashboard/' + folder.folderName;
+                            itemsContainer.appendChild(folderElement);
+                        });
+                    }
 
-                    files.forEach(file => {
-                        var fileElement = document.createElement('div');
-                        fileElement.className = 'file';
-                        fileElement.innerHTML = `
-                            <p>${file.fileName.length > 8 ? file.fileName.substring(0, 8) + '...' : file.fileName}</p>
-                            <div class="dropdown">
-                                &#x22EE;
-                                <div class="dropdown-content">
-                                    <a href="#" onclick="deleteFile(${file.fileId}); return false;">Sil</a>
-                                    <a href="#" onclick="downloadFile(${file.fileId}); return false;">Yükle</a>
+                    if (Array.isArray(files)) {
+                        files.forEach(file => {
+                            var fileElement = document.createElement('div');
+                            fileElement.className = 'file';
+                            fileElement.innerHTML = `
+                                <p>${file.fileName.length > 8 ? file.fileName.substring(0, 8) + '...' : file.fileName}</p>
+                                <div class="dropdown">
+                                    &#x22EE;
+                                    <div class="dropdown-content">
+                                        <a href="#" onclick="deleteFile(${file.fileId}); return false;">Sil</a>
+                                        <a href="#" onclick="downloadFile(${file.fileId}); return false;">Yükle</a>
+                                    </div>
                                 </div>
-                            </div>
-                        `;
-                        itemsContainer.appendChild(fileElement);
-                    });
+                            `;
+                            fileElement.onclick = () => showFileInfo(file);
+                            itemsContainer.appendChild(fileElement);
+                        });
+                    }
                 });
         });
 }
- 
+
+
+function showFileInfo(file) {
+    document.getElementById('fileInfoName').innerText = 'Dosya Adı: ' + file.fileName;
+    document.getElementById('fileInfoType').innerText = 'Dosya Türü: ' + file.fileType;
+    document.getElementById('fileInfoSize').innerText = 'Dosya Boyutu: ' + file.fileSize + ' bytes';
+    document.getElementById('fileInfoModal').style.display = 'flex';
+}
+
+function closeFileInfoModal() {
+    document.getElementById('fileInfoModal').style.display = 'none';
+}
         // Modal dışında bir yere tıklanıldığında modalı kapatma işlevi
-        window.onclick = function(event) {
+         window.onclick = function(event) {
             var createFolderModal = document.getElementById('createFolderModal');
             var uploadFileModal = document.getElementById('uploadFileModal');
+            var fileInfoModal = document.getElementById('fileInfoModal');
             if (event.target == createFolderModal) {
                 createFolderModal.style.display = 'none';
             }
             if (event.target == uploadFileModal) {
                 uploadFileModal.style.display = 'none';
             }
+            if (event.target == fileInfoModal) {
+                fileInfoModal.style.display = 'none';
+            }
         }
-    </script>
+ </script>
 </body>
 </html>

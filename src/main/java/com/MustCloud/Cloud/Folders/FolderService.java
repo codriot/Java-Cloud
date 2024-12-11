@@ -26,4 +26,13 @@ public class FolderService {
     public Folder findFolderById(Integer folderId) {
         return folderRepository.findById(folderId).orElse(null);
     }
+
+    public Folder findFolderByName(String folderName) {
+        return folderRepository.findByFolderName(folderName);
+    }
+
+    public List<Folder> getSubFoldersByFolderId(int folderId) {
+        Folder parentFolder = findFolderById(folderId);
+        return folderRepository.findByParentFolder(parentFolder);
+    }
 }

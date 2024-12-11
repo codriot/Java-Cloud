@@ -26,4 +26,8 @@ public class FileService {
     public void deleteFile(Integer fileId) {
         fileRepository.deleteById(fileId);
     }
+
+    public List<File> getFilesByFolderId(int folderId) {
+        return fileRepository.findByFolderFolderId(folderId);
+    }
 }
