@@ -1,7 +1,6 @@
 package com.MustCloud.Cloud.Users;
 
 import com.MustCloud.Cloud.Files.File;
-import com.MustCloud.Cloud.Folders.Folder;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -29,8 +28,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Folder> folders;
+
 
     // Getters and Setters
     public Integer getUserId() {
@@ -87,13 +85,5 @@ public class User {
 
     public void setFiles(List<File> files) {
         this.files = files;
-    }
-
-    public List<Folder> getFolders() {
-        return folders;
-    }
-
-    public void setFolders(List<Folder> folders) {
-        this.folders = folders;
     }
 }

@@ -7,16 +7,15 @@ import java.util.List;
 
 @Service
 public class FileService {
-
     @Autowired
     private FileRepository fileRepository;
 
-    public List<File> getFilesByUserId(Integer userId) {
-        return fileRepository.findByUserUserId(userId);
-    }
-
     public File saveFile(File file) {
         return fileRepository.save(file);
+    }
+
+    public List<File> findFilesByUserId(Integer userId) {
+        return fileRepository.findByUserUserId(userId);
     }
 
     public File findFileById(Integer fileId) {
@@ -25,9 +24,5 @@ public class FileService {
 
     public void deleteFile(Integer fileId) {
         fileRepository.deleteById(fileId);
-    }
-
-    public List<File> getFilesByFolderId(int folderId) {
-        return fileRepository.findByFolderFolderId(folderId);
     }
 }
