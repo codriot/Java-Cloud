@@ -30,16 +30,17 @@ public class FolderController {
     private UserService userService;
 
     @PostMapping("/create")
-    public ResponseEntity<Folder> createFolder(@RequestBody Folder folder, @RequestParam Integer userId) {
+    public ResponseEntity<Folder> createFolder(@RequestParam Integer userId, @RequestParam String folderName) {
         User user = userService.findUserById(userId);
         if (user == null) {
             throw new IllegalArgumentException("User not found");
         }
+        Folder folder = new Folder();
         folder.setUser(user);
+        folder.setFolderName(folderName);
         Folder createdFolder = folderService.createFolder(folder);
         return ResponseEntity.ok(createdFolder);
     }
-
     @DeleteMapping("/delete/{folderId}")
     public ResponseEntity<Void> deleteFolder(@PathVariable Integer folderId) {
         folderService.deleteFolder(folderId);

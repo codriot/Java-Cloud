@@ -67,7 +67,7 @@
         <form th:action="@{/dashboard}" method="post">
             <input type="email" name="email" placeholder="Email" required />
             <input type="password" name="password" placeholder="Password" required />
-            <button type="submit">Login</button>
+            <button type="submit">Giriş Yap</button>
         </form>
         <a th:href="@{/register}">Kayıt Ol</a>
         <div class="error-message" th:if="${error}">Geçersiz kullanıcı adı veya şifre</div>

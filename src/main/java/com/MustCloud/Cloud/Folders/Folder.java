@@ -17,24 +17,24 @@ public class Folder {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("userReference")
     private User user;
 
     private String folderName;
 
     @ManyToOne
     @JoinColumn(name = "parent_folder_id")
-    @JsonBackReference("parentFolder")
+    @JsonBackReference("parentFolderReference")
     private Folder parentFolder;
 
     private LocalDateTime creationDate = LocalDateTime.now();
 
     @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("parentFolder")
+    @JsonManagedReference("parentFolderReference")
     private List<Folder> subFolders;
 
     @OneToMany(mappedBy = "folder", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("folderReference")
     private List<File> files;
 
     // Getters and Setters

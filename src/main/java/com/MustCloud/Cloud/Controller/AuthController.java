@@ -27,20 +27,20 @@ public class AuthController {
     public String showLoginPage() {
         return "login";
     }
-
-    @PostMapping("/dashboard")
-    public String login(@RequestParam String email, @RequestParam String password, Model model) {
-        User user = userService.findUserByEmail(email);
-        if (user != null && user.getPassword().equals(password)) {
-            model.addAttribute("user", user);
-            model.addAttribute("files", fileService.getFilesByUserId(user.getUserId()));
-            model.addAttribute("folders", folderService.getFoldersByUserId(user.getUserId()));
-            return "dashboard";
-        } else {
-            model.addAttribute("error", "Invalid email or password");
-            return "login";
-        }
+@PostMapping("/dashboard")
+public String login(@RequestParam String email, @RequestParam String password, Model model) {
+    User user = userService.findUserByEmail(email);
+    if (user != null && user.getPassword().equals(password)) {
+        model.addAttribute("user", user);
+        model.addAttribute("userId", user.getUserId()); // Kullanıcı ID'sini ekleyin
+        model.addAttribute("files", fileService.getFilesByUserId(user.getUserId()));
+        model.addAttribute("folders", folderService.getFoldersByUserId(user.getUserId()));
+        return "dashboard";
+    } else {
+        model.addAttribute("error", "Invalid email or password");
+        return "login";
     }
+}
 
     @GetMapping("/register")
     public String showRegisterPage() {
