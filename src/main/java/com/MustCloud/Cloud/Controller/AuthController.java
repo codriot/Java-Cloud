@@ -19,7 +19,6 @@ import java.util.List;
 
 @Controller
 public class AuthController {
-
     @Autowired
     private UserService userService;
 
@@ -50,8 +49,8 @@ public class AuthController {
     }
 
     @GetMapping("/register")
-    public String showRegisterPage() {
-        return "register";
+    public String showRegisterPage(Model model) {
+        return "redirect:/users";
     }
 
     @GetMapping("/dashboard")
@@ -87,7 +86,7 @@ public class AuthController {
         return ResponseEntity.ok(files);
     }
 
-    @GetMapping("/api/folders/list/{userId}/{currentFolder}")
+    @GetMapping("/api/auth/folders/listFolders/{userId}/{currentFolder}")
     public ResponseEntity<List<Folder>> listFolders(@PathVariable Integer userId, @PathVariable String currentFolder) {
         Folder parentFolder = folderService.findFolderByName(currentFolder);
         List<Folder> folders;

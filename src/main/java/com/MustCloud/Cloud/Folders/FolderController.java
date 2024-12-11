@@ -30,7 +30,7 @@ public class FolderController {
     private UserService userService;
 
     @PostMapping("/create")
-    public ResponseEntity<Folder> createFolder(@RequestParam Integer userId, @RequestParam String folderName) {
+    public ResponseEntity<Folder> createFolder(@RequestParam Integer userId, @RequestParam String folderName, @RequestParam(required = false) Integer parentFolderId) {
         User user = userService.findUserById(userId);
         if (user == null) {
             throw new IllegalArgumentException("User not found");
@@ -38,9 +38,14 @@ public class FolderController {
         Folder folder = new Folder();
         folder.setUser(user);
         folder.setFolderName(folderName);
+        if (parentFolderId != null) {
+            Folder parentFolder = folderService.findFolderById(parentFolderId);
+            folder.setParentFolder(parentFolder);
+        }
         Folder createdFolder = folderService.createFolder(folder);
         return ResponseEntity.ok(createdFolder);
     }
+
     @DeleteMapping("/delete/{folderId}")
     public ResponseEntity<Void> deleteFolder(@PathVariable Integer folderId) {
         folderService.deleteFolder(folderId);
@@ -74,7 +79,6 @@ public class FolderController {
                         });
 
                 zipOutputStream.close();
-
                 ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
                 InputStreamResource resource = new InputStreamResource(byteArrayInputStream);
 
@@ -88,9 +92,15 @@ public class FolderController {
         });
     }
 
-    @GetMapping("/list/{userId}")
-    public ResponseEntity<List<Folder>> listFolders(@PathVariable Integer userId) {
-        List<Folder> folders = folderService.getFoldersByUserId(userId);
+    @GetMapping("/listFolders/{userId}/{currentFolder}")
+    public ResponseEntity<List<Folder>> listFolders(@PathVariable Integer userId, @PathVariable String currentFolder) {
+        Folder parentFolder = folderService.findFolderByName(currentFolder);
+        List<Folder> folders;
+        if (parentFolder != null) {
+            folders = folderService.getSubFoldersByFolderId(parentFolder.getFolderId());
+        } else {
+            folders = folderService.getFoldersByUserId(userId);
+        }
         return ResponseEntity.ok(folders);
     }
 }

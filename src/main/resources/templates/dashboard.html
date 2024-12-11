@@ -224,11 +224,13 @@
             uploadFileModal.style.display = 'flex';
         }
 
+         
         function createFolder() {
             var folderName = document.getElementById('folderNameInput').value;
             var userId = document.body.getAttribute('data-user-id'); // Dinamik kullanıcı ID'si
+            var currentFolder = window.location.pathname.split('/').pop(); // Mevcut klasör
             if (folderName) {
-                fetch('/api/folders/create?userId=' + userId + '&folderName=' + encodeURIComponent(folderName), {
+                fetch('/api/folders/create?userId=' + userId + '&folderName=' + encodeURIComponent(folderName) + '&parentFolderId=' + (currentFolder !== 'dashboard' ? currentFolder : ''), {
                     method: 'POST'
                 }).then(response => {
                     if (response.ok) {
@@ -239,17 +241,20 @@
                     }
                 });
             }
-        }        
-        
+        }
+   
+
         function uploadFile() {
             var fileInput = document.getElementById('fileInput');
             var file = fileInput.files[0];
             var userId = document.body.getAttribute('data-user-id');
+            var currentFolder = window.location.pathname.split('/').pop(); // Mevcut klasör
             if (file) {
                 var formData = new FormData();
                 formData.append('file', file);
                 formData.append('userId', userId);
-
+                formData.append('folderId', currentFolder);
+        
                 fetch('/api/files/upload', {
                     method: 'POST',
                     body: formData
@@ -330,10 +335,10 @@
 function loadItems() {
     var userId = document.body.getAttribute('data-user-id');
     var currentFolder = window.location.pathname.split('/').pop();
-    fetch('/api/files/list/' + userId + '/' + currentFolder)
+    fetch('/api/files/listFiles/' + userId + '/' + currentFolder)
         .then(response => response.json())
         .then(files => {
-            fetch('/api/folders/list/' + userId + '/' + currentFolder)
+            fetch('/api/folders/listFolders/' + userId + '/' + currentFolder)
                 .then(response => response.json())
                 .then(folders => {
                     var itemsContainer = document.getElementById('items-container');
@@ -379,6 +384,8 @@ function loadItems() {
                 });
         });
 }
+
+
 
 
 function showFileInfo(file) {

@@ -1,5 +1,7 @@
 package com.MustCloud.Cloud.Files;
 
+import com.MustCloud.Cloud.Folders.Folder;
+import com.MustCloud.Cloud.Folders.FolderService;
 import com.MustCloud.Cloud.Users.User;
 import com.MustCloud.Cloud.Users.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +22,17 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
 @RestController
 @RequestMapping("/api/files")
 public class FileController {
-
     @Autowired
     private FileService fileService;
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FolderService folderService;
 
     private static final String UPLOAD_DIR = "uploads/";
 
@@ -56,7 +59,6 @@ public class FileController {
                 newFile.setFileSize(file.getSize());
                 newFile.setStoragePath(filePath.toString());
                 File savedFile = fileService.saveFile(newFile);
-
                 return ResponseEntity.ok(savedFile);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -100,10 +102,15 @@ public class FileController {
         });
     }
 
-    @GetMapping("/list/{userId}")
-    public ResponseEntity<List<File>> listFiles(@PathVariable Integer userId) {
-        List<File> files = fileService.getFilesByUserId(userId);
+    @GetMapping("/listFiles/{userId}/{currentFolder}")
+    public ResponseEntity<List<File>> listFiles(@PathVariable Integer userId, @PathVariable String currentFolder) {
+        Folder parentFolder = folderService.findFolderByName(currentFolder);
+        List<File> files;
+        if (parentFolder != null) {
+            files = fileService.getFilesByFolderId(parentFolder.getFolderId());
+        } else {
+            files = fileService.getFilesByUserId(userId);
+        }
         return ResponseEntity.ok(files);
     }
-
 }
