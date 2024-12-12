@@ -1,6 +1,7 @@
 package com.MustCloud.Cloud.Users;
 
 import com.MustCloud.Cloud.Files.File;
+import com.MustCloud.Cloud.Util.JwtUtil;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -28,8 +29,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<File> files;
 
-
-
     // Getters and Setters
     public Integer getUserId() {
         return userId;
@@ -37,6 +36,14 @@ public class User {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public String getUserIdToken() {
+        return JwtUtil.generateToken(this.userId);
+    }
+
+    public void setUserIdFromToken(String token) {
+        this.userId = JwtUtil.extractUserId(token);
     }
 
     public String getEmail() {

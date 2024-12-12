@@ -188,15 +188,7 @@
             <button onclick="uploadFile()" th:attr="data-user-id=${userId}">Yükle</button>
         </div>
     </div>
-    <div class="modal" id="fileInfoModal">
-        <div class="modal-content">
-            <h2>Dosya Bilgileri</h2>
-            <p id="fileInfoName"></p>
-            <p id="fileInfoType"></p>
-            <p id="fileInfoSize"></p>
-            <button onclick="closeFileInfoModal()">Kapat</button>
-        </div>
-    </div>
+
 
     <script>
         function toggleFabMenu() {
@@ -268,9 +260,7 @@
 
 
 
-        function closeFileInfoModal() {
-            document.getElementById('fileInfoModal').style.display = 'none';
-        }
+
 
         function toggleDropdown(event) {
             var dropdownContent = event.currentTarget.querySelector('.dropdown-content');
@@ -307,13 +297,10 @@
 
         window.onclick = function(event) {
             var uploadFileModal = document.getElementById('uploadFileModal');
-            var fileInfoModal = document.getElementById('fileInfoModal');
             if (event.target == uploadFileModal) {
                 uploadFileModal.style.display = 'none';
             }
-            if (event.target == fileInfoModal) {
-                fileInfoModal.style.display = 'none';
-            }
+
         }
     </script>
 </body>
