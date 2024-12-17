@@ -1,6 +1,5 @@
 package com.MustCloud.Cloud.Files;
 
-import com.MustCloud.Cloud.Folders.Folder;
 import com.MustCloud.Cloud.Users.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -18,15 +17,19 @@ public class File {
     @JsonBackReference
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "folder_id")
-    @JsonBackReference
-    private Folder folder;
-
+    @Column(name = "file_name", nullable = false)
     private String fileName;
+
+    @Column(name = "file_type", length = 255)
     private String fileType;
+
+    @Column(name = "file_size")
     private Long fileSize;
+
+    @Column(name = "upload_date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime uploadDate = LocalDateTime.now();
+
+    @Column(name = "storage_path", nullable = false)
     private String storagePath;
 
     // Getters and Setters
@@ -44,14 +47,6 @@ public class File {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public Folder getFolder() {
-        return folder;
-    }
-
-    public void setFolder(Folder folder) {
-        this.folder = folder;
     }
 
     public String getFileName() {

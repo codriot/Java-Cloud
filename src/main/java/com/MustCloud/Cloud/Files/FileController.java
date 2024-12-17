@@ -1,27 +1,24 @@
 package com.MustCloud.Cloud.Files;
 
-import com.MustCloud.Cloud.Folders.Folder;
-import com.MustCloud.Cloud.Folders.FolderService;
-import com.MustCloud.Cloud.Users.User;
-import com.MustCloud.Cloud.Users.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.MustCloud.Cloud.Users.User;
+import com.MustCloud.Cloud.Users.UserService;
+
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
 @RestController
 @RequestMapping("/api/files")
 public class FileController {
@@ -30,9 +27,6 @@ public class FileController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private FolderService folderService;
 
     private static final String UPLOAD_DIR = "uploads/";
 
@@ -45,12 +39,10 @@ public class FileController {
                 if (user == null) {
                     throw new IllegalArgumentException("User not found");
                 }
-
                 // Dosyayı yükleme dizinine kaydet
                 Path filePath = Paths.get(UPLOAD_DIR + file.getOriginalFilename());
                 Files.createDirectories(filePath.getParent());
                 Files.write(filePath, file.getBytes());
-
                 // Dosya bilgilerini veritabanına kaydet
                 File newFile = new File();
                 newFile.setUser(user);
@@ -66,6 +58,12 @@ public class FileController {
         });
     }
 
+    @GetMapping("/listFiles/{userId}")
+    public ResponseEntity<List<File>> listFiles(@PathVariable Integer userId) {
+        List<File> files = fileService.findFilesByUserId(userId);
+        return ResponseEntity.ok(files);
+    }
+
     @DeleteMapping("/delete/{fileId}")
     public ResponseEntity<Void> deleteFile(@PathVariable Integer fileId) {
         fileService.deleteFile(fileId);
@@ -75,42 +73,26 @@ public class FileController {
     @GetMapping("/download/{fileId}")
     public CompletableFuture<ResponseEntity<Resource>> downloadFile(@PathVariable Integer fileId) {
         return CompletableFuture.supplyAsync(() -> {
+            File file = fileService.findFileById(fileId);
+            if (file == null) {
+                return ResponseEntity.notFound().build();
+            }
+            Path filePath = Paths.get(file.getStoragePath());
             try {
-                File file = fileService.findFileById(fileId);
-                if (file == null) {
-                    throw new IllegalArgumentException("File not found");
+                // Zip dosyasını oluştur
+                Path zipPath = Files.createTempFile("file-", ".zip");
+                try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipPath))) {
+                    zos.putNextEntry(new ZipEntry(file.getFileName()));
+                    Files.copy(filePath, zos);
+                    zos.closeEntry();
                 }
-
-                Path filePath = Paths.get(file.getStoragePath());
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
-                zipOutputStream.putNextEntry(new ZipEntry(file.getFileName()));
-                Files.copy(filePath, zipOutputStream);
-                zipOutputStream.closeEntry();
-                zipOutputStream.close();
-
-                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-                InputStreamResource resource = new InputStreamResource(byteArrayInputStream);
-
+                Resource resource = new InputStreamResource(Files.newInputStream(zipPath));
                 return ResponseEntity.ok()
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + ".zip\"")
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
                         .body(resource);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                return ResponseEntity.status(500).build();
             }
         });
-    }
-
-    @GetMapping("/listFiles/{userId}/{currentFolder}")
-    public ResponseEntity<List<File>> listFiles(@PathVariable Integer userId, @PathVariable String currentFolder) {
-        Folder parentFolder = folderService.findFolderByName(currentFolder);
-        List<File> files;
-        if (parentFolder != null) {
-            files = fileService.getFilesByFolderId(parentFolder.getFolderId());
-        } else {
-            files = fileService.getFilesByUserId(userId);
-        }
-        return ResponseEntity.ok(files);
     }
 }

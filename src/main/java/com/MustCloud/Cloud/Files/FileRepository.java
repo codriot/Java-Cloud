@@ -8,5 +8,4 @@ import java.util.List;
 @Repository
 public interface FileRepository extends JpaRepository<File, Integer> {
     List<File> findByUserUserId(Integer userId);
-    List<File> findByFolderFolderId(Integer folderId);
 }
