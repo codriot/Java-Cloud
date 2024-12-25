@@ -3,6 +3,8 @@ package com.MustCloud.Cloud.Controller;
 import com.MustCloud.Cloud.Files.FileService;
 import com.MustCloud.Cloud.Users.User;
 import com.MustCloud.Cloud.Users.UserService;
+import com.MustCloud.Cloud.Util.JwtUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,8 +32,9 @@ public class AuthController {
     public String login(@RequestParam String email, @RequestParam String password, Model model) {
         User user = userService.findUserByEmail(email);
         if (user != null && user.getPassword().equals(password)) {
+              String token = JwtUtil.generateToken(user.getUserId());
             model.addAttribute("user", user);
-            model.addAttribute("userId", user.getUserId());
+            model.addAttribute("userId", token);
             model.addAttribute("files", fileService.findFilesByUserId(user.getUserId()));
             return "dashboard";
         }

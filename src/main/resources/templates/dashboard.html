@@ -204,15 +204,28 @@
             var uploadFileModal = document.getElementById('uploadFileModal');
             uploadFileModal.style.display = 'flex';
         }
+        function extractUserId(token) {
+    try {
+        // Token'in payload kısmını al (header ve signature'ı at)
+        const payloadBase64 = token.split('.')[1]; // JWT: header.payload.signature
+        const payload = JSON.parse(atob(payloadBase64)); // Base64 çöz ve JSON'a çevir
 
+        // Kullanıcı ID'sini döndür
+        return parseInt(payload.sub); // "sub" genelde userId'dir
+    } catch (error) {
+        console.error("Token çözümleme hatası:", error);
+        return null;
+    }
+}
         function uploadFile() {
             var fileInput = document.getElementById('fileInput');
             var file = fileInput.files[0];
-            var userId = document.body.getAttribute('data-user-id');
+            
+            var token = document.body.getAttribute('data-user-id');
             if (file) {
                 var formData = new FormData();
                 formData.append('file', file);
-                formData.append('userId', userId);
+                formData.append('userId', extractUserId(token));
 
                 fetch('/api/files/upload', {
                     method: 'POST',
@@ -268,7 +281,9 @@
         }
 
         function loadItems() {
-            var userId = document.body.getAttribute('data-user-id');
+            
+            var token = document.body.getAttribute('data-user-id');
+            var userId = extractUserId(token);
             fetch('/api/files/listFiles/' + userId)
                 .then(response => response.json())
                 .then(files => {
