@@ -60,8 +60,16 @@ public class FileController {
 
     @GetMapping("/listFiles/{userId}")
     public ResponseEntity<List<File>> listFiles(@PathVariable Integer userId) {
-        List<File> files = fileService.findFilesByUserId(userId);
-        return ResponseEntity.ok(files);
+        User user = userService.findUserById(userId);
+        if (user != null && "Admin".equals(user.getAccountType())) {
+            // Admin kullanıcısı için tüm dosyaları getir
+            List<File> files = fileService.findAllFiles();
+            return ResponseEntity.ok(files);
+        } else {
+            // Normal kullanıcı için sadece kendi dosyalarını getir
+            List<File> files = fileService.findFilesByUserId(userId);
+            return ResponseEntity.ok(files);
+        }
     }
 
     @DeleteMapping("/delete/{fileId}")
@@ -94,5 +102,17 @@ public class FileController {
                 return ResponseEntity.status(500).build();
             }
         });
+    }
+
+    @PostMapping("/share/{fileId}")
+    public ResponseEntity<?> shareFile(@PathVariable Integer fileId, @RequestParam String recipientEmail) {
+        try {
+            File sharedFile = fileService.shareFile(fileId, recipientEmail);
+            return ResponseEntity.ok(sharedFile);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("Dosya paylaşımı sırasında bir hata oluştu");
+        }
     }
 }

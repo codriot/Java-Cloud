@@ -1,110 +1,109 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Users</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f1f3f4;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        h1, h2 {
-            color: #333;
-        }
-        table {
-            width: 100%;
-            max-width: 800px;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #4285f4;
-            color: white;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        form {
-            width: 100%;
-            max-width: 800px;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #357ae8;
-        }
-    </style>
+    <title>Kullanıcı Yönetimi - MustCloud</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body>
-    <h1>Users</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Account Type</th>
-                <th>Signup Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="user : ${users}">
-                <td th:text="${user.userId}">1</td>
-                <td th:text="${user.name}">Name</td>
-                <td th:text="${user.email}">Email</td>
-                <td th:text="${user.accountType}">Account Type</td>
-                <td th:text="${user.signupDate}">Signup Date</td>
-            </tr>
-        </tbody>
-    </table>
+<body th:attr="data-user-id=${userId}">
+    <div class="container">
+        <div class="dashboard-container">
+            <div class="logo-container">
+                <h1 class="logo">MustCloud</h1>
+            </div>
 
-    <h2>Create New User</h2>
-    <form th:action="@{/users}" th:object="${newUser}" method="post">
-        <label for="name">Name:</label>
-        <input type="text" id="name" th:field="*{name}" />
-        <label for="email">Email:</label>
-        <input type="email" id="email" th:field="*{email}" />
-        <label for="password">Password:</label>
-        <input type="password" id="password" th:field="*{password}" />
-        <label for="accountType">Account Type:</label>
-        <input type="text" id="accountType" th:field="*{accountType}" />
-        <button type="submit">Create</button>
-    </form>
+            <div class="users-nav">
+                <div class="nav-card" onclick="showDashboard()">
+                    <span class="icon">📁</span>
+                    <h2>Dosya Yönetimi</h2>
+                    <p>Dosyalarınızı görüntüleyin ve yönetin</p>
+                </div>
+                <div class="nav-card" onclick="showUsersList()">
+                    <span class="icon">👥</span>
+                    <h2>Kullanıcılar</h2>
+                    <p>Tüm kullanıcıları görüntüleyin</p>
+                </div>
+                <div class="nav-card" onclick="showUserForm()">
+                    <span class="icon">➕</span>
+                    <h2>Kullanıcı Ekle</h2>
+                    <p>Yeni kullanıcı oluşturun</p>
+                </div>
+            </div>
+
+            <div id="usersList" class="table-container" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ad Soyad</th>
+                            <th>E-posta</th>
+                            <th>Hesap Türü</th>
+                            <th>Kayıt Tarihi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td th:text="${user.userId}">1</td>
+                            <td th:text="${user.name}">Ad Soyad</td>
+                            <td th:text="${user.email}">E-posta</td>
+                            <td th:text="${user.accountType}">Hesap Türü</td>
+                            <td th:text="${#temporals.format(user.signupDate, 'dd/MM/yyyy HH:mm')}">Kayıt Tarihi</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="userForm" class="table-container" style="display: none;">
+                <h2 style="margin-bottom: 20px; color: var(--text-color);">Yeni Kullanıcı Oluştur</h2>
+                <form th:action="@{/users}" th:object="${newUser}" method="post" style="max-width: 400px; margin: 0 auto;">
+                    <div class="form-group">
+                        <input type="text" id="name" th:field="*{name}" placeholder="Ad Soyad" required class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="email" th:field="*{email}" placeholder="E-posta" required class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" th:field="*{password}" placeholder="Şifre" required class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <select id="accountType" th:field="*{accountType}" class="form-control account-type-select">
+                            <option value="Normal">Normal Kullanıcı</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Kullanıcı Oluştur</button>
+                </form>
+            </div>
+
+            <!-- Dashboard Dosya Listesi -->
+            <div id="dashboardContent">
+                <div id="items-container" class="items">
+                    <!-- Dosyalar buraya yüklenecek -->
+                </div>
+
+                <!-- Dosya Yükleme Butonu -->
+                <button class="fab" onclick="document.getElementById('fileInput').click()">+</button>
+                <input type="file" id="fileInput" style="display: none;" onchange="uploadFile(this.files[0])">
+
+                <!-- Paylaşım Modalı -->
+                <div id="shareModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close" onclick="closeShareModal()">&times;</span>
+                        <div class="modal-header">
+                            <h2 class="modal-title">Dosya Paylaş</h2>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="recipientEmail" placeholder="Alıcı E-posta" class="form-control">
+                        </div>
+                        <button onclick="shareFile()" class="btn">Paylaş</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/users.js}"></script>
+    <script th:src="@{/js/dashboard.js}"></script>
 </body>
 </html>

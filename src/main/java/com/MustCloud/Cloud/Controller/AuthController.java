@@ -32,7 +32,7 @@ public class AuthController {
             model.addAttribute("files", fileService.findFilesByUserId(user.getUserId()));
             
             if ("Admin".equals(user.getAccountType())) {
-                return "redirect:/users";
+                return "redirect:/users?email=" + email + "&password=" + password;
             } else {
                 return "dashboard";
             }
