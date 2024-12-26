@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
 @Controller
 public class AuthController {
     @Autowired
@@ -20,8 +19,6 @@ public class AuthController {
 
     @Autowired
     private FileService fileService;
-
-
 
     @GetMapping("/login")
     public String showLoginPage() {
@@ -36,9 +33,13 @@ public class AuthController {
             model.addAttribute("user", user);
             model.addAttribute("userId", token);
             model.addAttribute("files", fileService.findFilesByUserId(user.getUserId()));
-            return "dashboard";
-        }
-        else {
+            
+            if ("Admin".equals(user.getAccountType())) {
+                return "redirect:/users";
+            } else {
+                return "dashboard";
+            }
+        } else {
             model.addAttribute("error", "Invalid email or password");
             return "login";
         }
@@ -46,7 +47,15 @@ public class AuthController {
 
     @GetMapping("/register")
     public String showRegisterPage(Model model) {
-        return "redirect:/users";
+        model.addAttribute("newUser", new User());
+        return "register";
+    }
+
+    @PostMapping("/register")
+    public String register(User user) {
+        user.setAccountType("Normal");
+        userService.saveUser(user);
+        return "redirect:/login";
     }
 
     @GetMapping("/dashboard")
@@ -54,5 +63,4 @@ public class AuthController {
         model.addAttribute("files", fileService.findFilesByUserId(userId));
         return "dashboard";
     }
-
 }
