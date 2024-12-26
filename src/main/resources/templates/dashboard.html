@@ -1,174 +1,16 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f1f3f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            position: relative;
-            margin: 0;
-        }
-        .dashboard-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            width: 80%;
-            max-width: 1200px;
-        }
-        .header {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        .items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-        .file {
-            width: 150px;
-            height: 40px;
-            background-color: #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            line-height: 1.2;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-        }
-        .file p {
-            margin: 0;
-            font-size: 14px;
-            word-break: break-all;
-        }
-        .file:hover {
-            background-color: #d0d0d0;
-        }
-        .fab {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 56px;
-            height: 56px;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .fab-menu {
-            display: none;
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-        .fab-menu ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .fab-menu ul li {
-            padding: 10px;
-            cursor: pointer;
-        }
-        .fab-menu ul li:hover {
-            background-color: #f1f1f1;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        .dropdown {
-            position: absolute;
-            top: 50%;
-            right: 10px;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transform: translateY(-50%);
-        }
-
-        .dropdown:hover {
-            background-color: #1e1f1f85;
-            border-radius: 50%;
-            color: white;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            left: 0;
-            top: 30px;
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1;
-            border-radius: 4px;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-            min-width: 200px;
-            font-size: 13px;
-            font-weight: 400;
-        }
-
-        .dropdown-content a {
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            color: black;
-            transition: background-color 0.3s;
-        }
-
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-
-        .dropdown-content .icon {
-            margin-right: 8px;
-        }
-    </style>
+    <title>Dashboard - MustCloud</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body onload="loadItems()" th:attr="data-user-id=${userId}">
     <div class="dashboard-container">
-        <div class="header">MustCloud</div>
+        <div class="logo-container">
+            <h1 class="logo">MustCloud</h1>
+        </div>
         <div class="items" id="items-container">
             <!-- Dinamik olarak güncellenecek dosyalar -->
         </div>
@@ -183,140 +25,24 @@
 
     <div class="modal" id="uploadFileModal">
         <div class="modal-content">
-            <h2>Dosya Yükle</h2>
-            <input type="file" id="fileInput" />
-            <button onclick="uploadFile()" th:attr="data-user-id=${userId}">Yükle</button>
+            <h2 class="modal-title">Dosya Yükle</h2>
+            <div class="form-group">
+                <input type="file" id="fileInput" class="form-control" />
+            </div>
+            <button onclick="uploadFile()" th:attr="data-user-id=${userId}" class="btn">Yükle</button>
         </div>
     </div>
 
+    <div class="modal" id="shareFileModal">
+        <div class="modal-content">
+            <h2 class="modal-title">Dosya Paylaş</h2>
+            <div class="form-group">
+                <input type="email" id="recipientEmail" placeholder="Alıcı E-posta Adresi" class="form-control" />
+            </div>
+            <button onclick="shareFile()" class="btn">Gönder</button>
+        </div>
+    </div>
 
-    <script>
-        function toggleFabMenu() {
-            var fabMenu = document.getElementById('fabMenu');
-            if (fabMenu.style.display === 'none' || fabMenu.style.display === '') {
-                fabMenu.style.display = 'block';
-            } else {
-                fabMenu.style.display = 'none';
-            }
-        }
-
-        function showUploadFileModal() {
-            var uploadFileModal = document.getElementById('uploadFileModal');
-            uploadFileModal.style.display = 'flex';
-        }
-        function extractUserId(token) {
-    try {
-        // Token'in payload kısmını al (header ve signature'ı at)
-        const payloadBase64 = token.split('.')[1]; // JWT: header.payload.signature
-        const payload = JSON.parse(atob(payloadBase64)); // Base64 çöz ve JSON'a çevir
-
-        // Kullanıcı ID'sini döndür
-        return parseInt(payload.sub); // "sub" genelde userId'dir
-    } catch (error) {
-        console.error("Token çözümleme hatası:", error);
-        return null;
-    }
-}
-        function uploadFile() {
-            var fileInput = document.getElementById('fileInput');
-            var file = fileInput.files[0];
-            
-            var token = document.body.getAttribute('data-user-id');
-            if (file) {
-                var formData = new FormData();
-                formData.append('file', file);
-                formData.append('userId', extractUserId(token));
-
-                fetch('/api/files/upload', {
-                    method: 'POST',
-                    body: formData
-                }).then(response => {
-                    if (response.ok) {
-                        loadItems();
-                        document.getElementById('uploadFileModal').style.display = 'none';
-                    } else {
-                        alert('Dosya yüklenemedi');
-                    }
-                }).catch(error => {
-                    console.error('Dosya yükleme hatası:', error);
-                    alert('Dosya yüklenemedi');
-                });
-            }
-        }
-
-        function deleteFile(fileId) {
-            fetch('/api/files/delete/' + fileId, {
-                method: 'DELETE'
-            }).then(response => {
-                if (response.ok) {
-                    loadItems();
-                } else {
-                    alert('Dosya silinemedi');
-                }
-            });
-        }
-
-        function downloadFile(fileId) {
-            fetch('/api/files/download/' + fileId)
-                .then(response => response.blob())
-                .then(blob => {
-                    var url = window.URL.createObjectURL(blob);
-                    var a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'file.zip';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                })
-                .catch(() => alert('Dosya indirilemedi'));
-        }
-
-
-
-
-
-        function toggleDropdown(event) {
-            var dropdownContent = event.currentTarget.querySelector('.dropdown-content');
-            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function loadItems() {
-            
-            var token = document.body.getAttribute('data-user-id');
-            var userId = extractUserId(token);
-            fetch('/api/files/listFiles/' + userId)
-                .then(response => response.json())
-                .then(files => {
-                    var itemsContainer = document.getElementById('items-container');
-                    itemsContainer.innerHTML = '';
-        
-                    if (Array.isArray(files)) {
-                        files.forEach(file => {
-                            var fileElement = document.createElement('div');
-                            fileElement.className = 'file';
-                            fileElement.innerHTML = `
-                                <p>${file.fileName.length > 8 ? file.fileName.substring(0, 8) + '...' : file.fileName}</p>
-                                <div class="dropdown" onclick="toggleDropdown(event)">
-                                    &#x22EE;
-                                    <div class="dropdown-content">
-                                        <a href="#" onclick="deleteFile(${file.fileId}); return false;">Sil</a>
-                                        <a href="#" onclick="downloadFile(${file.fileId}); return false;">İndir</a>
-                                    </div>
-                                </div>
-                            `;
-                            itemsContainer.appendChild(fileElement);
-                        });
-                    }
-                });
-        }
-
-        window.onclick = function(event) {
-            var uploadFileModal = document.getElementById('uploadFileModal');
-            if (event.target == uploadFileModal) {
-                uploadFileModal.style.display = 'none';
-            }
-
-        }
-    </script>
+    <script th:src="@{/js/dashboard.js}"></script>
 </body>
 </html>
